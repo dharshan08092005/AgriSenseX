@@ -690,9 +690,9 @@ function DashboardContent() {
                               {motorState.isOn ? "ON" : "OFF"}
                             </button>
                           ) : (
-                            <div className="w-full flex flex-col items-center">
-                              <div className="w-full flex items-center justify-between gap-1 mb-0">
-                                <div className="flex flex-col gap-0 w-full">
+                            <div className="w-full flex flex-col items-center px-2">
+                              <div className="w-full flex items-center justify-center gap-2 mb-0">
+                                <div className="flex flex-col items-center gap-0 w-full">
                                   <label className="text-[9px] font-bold text-[#4f8820]">Start Time</label>
                                   <input
                                     type="time"
@@ -703,9 +703,9 @@ function DashboardContent() {
                                 </div>
                                 
                                 {/* Vertical Divider */}
-                                <div className="w-[1.5px] h-8 bg-black mt-3 self-center" />
+                                <div className="w-[1.5px] h-8 bg-black mt-3 shrink-0" />
 
-                                <div className="flex flex-col gap-0 w-full">
+                                <div className="flex flex-col items-center gap-0 w-full">
                                   <label className="text-[9px] font-bold text-[#4f8820]">End Time</label>
                                   <input
                                     type="time"
@@ -730,7 +730,7 @@ function DashboardContent() {
 
                 {/* Controls - Aligned Side-by-Side */}
                 {blockIdx === Math.ceil(motorList.length / 2) - 1 && (
-                  <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                  <div className="absolute bottom-0 right-4 flex items-center gap-3 z-20">
                     <button
                       onClick={addMotorBlock}
                       className="bg-black text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
