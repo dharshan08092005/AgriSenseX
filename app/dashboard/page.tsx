@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense } from "react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { subscribeToTopic, publishMessage } from "../../lib/mqttClient";
+import { Suspense } from "react";
 
 type PhaseValues = { v: number; i: number; p: number; e: number };
 type MotorState = { isOn: boolean; onTime: string; offTime: string };
@@ -28,6 +28,14 @@ const MOTOR_TOPICS: Record<number, { control: string; status: string }> = {
 // Motor icon - sample (replace src with your own icon later)
 const MOTOR_ICON_SRC =
   "https://res.cloudinary.com/dbyxgnjkw/image/upload/v1767021968/icons8-motor-50_ooixaf.png";
+
+export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
+  );
+}
 
 function DashboardContent() {
   const router = useRouter();
@@ -596,42 +604,40 @@ function DashboardContent() {
                     next[m.id] = newMode;
                     if (newMode === "manual") {
                       const motorIdx = blockIdx * 2 + i;
-                      // Handle manual logic if needed
+                      const topic = MOTOR_TOPICS[motorIdx]?.control;
+                      if (topic) publishMessage(topic, "MANUAL");
                     }
                   });
                   return next;
                 });
+                
+                if (newMode === "manual" && autoTimerRef.current) {
+                  clearInterval(autoTimerRef.current);
+                  autoTimerRef.current = null;
+                }
               };
 
               return (
-                <div key={blockIdx} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/40">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-[#5bc0eb]/10 p-2 rounded-lg">
-                        <img src="/images/motor_icon.png" alt="Motor" className="w-6 h-6" />
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-800">
-                        Motor Group {blockIdx + 1}
-                      </h3>
-                    </div>
-
-                    <div className="flex items-center bg-gray-100/80 p-1 rounded-xl border border-gray-200">
+                <div key={blockIdx} className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 relative space-y-6">
+                  {/* Local Manual / Auto Toggle */}
+                  <div className="flex justify-center">
+                    <div className="bg-[#f7fdf4] p-1 rounded-full flex w-full max-w-[280px] shadow-sm border border-[#e8f5e1]">
                       <button
                         onClick={() => setBlockMode("manual")}
-                        className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                          currentBlockMode === "manual"
-                            ? "bg-white text-[#5bc0eb] shadow-sm"
-                            : "text-gray-500 hover:text-gray-700"
+                        className={`flex-1 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                          currentBlockMode === "manual" 
+                          ? "bg-[#b6e496] text-black shadow-md" 
+                          : "text-gray-400"
                         }`}
                       >
                         MANUAL
                       </button>
                       <button
                         onClick={() => setBlockMode("auto")}
-                        className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                          currentBlockMode === "auto"
-                            ? "bg-white text-[#5bc0eb] shadow-sm"
-                            : "text-gray-500 hover:text-gray-700"
+                        className={`flex-1 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                          currentBlockMode === "auto" 
+                          ? "bg-[#b6e496] text-black shadow-md" 
+                          : "text-gray-400"
                         }`}
                       >
                         AUTO
@@ -639,100 +645,123 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
                     {motorsInBlock.map((motor, idxInBlock) => {
-                      const motorIdx = blockIdx * 2 + idxInBlock;
-                      const motorData = motors[motor.name] || { isOn: false, onTime: "06:00", offTime: "18:00" };
-                      
+                      const idx = blockIdx * 2 + idxInBlock;
+                      const motorState = motors[motor.name] ?? {
+                        isOn: false,
+                        onTime: "06:00",
+                        offTime: "18:00",
+                      };
+
                       return (
-                        <div key={motor.id} className="relative group">
-                          <div className={`p-4 rounded-xl border-2 transition-all ${
-                            motorData.isOn 
-                              ? "bg-blue-50/50 border-blue-200 shadow-md" 
-                              : "bg-gray-50/50 border-gray-100"
-                          }`}>
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="font-bold text-gray-700">{motor.name}</span>
+                        <div
+                          key={motor.id}
+                          className="bg-[#eaf8e1] rounded-[32px] p-2 sm:p-3 flex flex-col items-center shadow-sm hover:shadow-md transition-shadow duration-300"
+                        >
+                          <div 
+                            className="flex flex-col items-center cursor-pointer w-full"
+                            onClick={() => router.push(`/dashboard/motor-details/${motor.id}`)}
+                          >
+                            <h3 className="text-lg sm:text-xl font-bold text-black mb-0">
+                              {motor.name}
+                            </h3>
+
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 mb-0">
+                              <img
+                                src="/images/motor.png"
+                                alt={motor.name}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          </div>
+
+                          {currentBlockMode === "manual" ? (
+                            <button
+                              onClick={() => {
+                                toggleMotor(motor.name, idx);
+                              }}
+                              className={`w-full max-w-[100px] py-1 rounded-full font-bold text-xs shadow-sm transition-all active:scale-95 ${
+                                motorState.isOn 
+                                ? "bg-[#b6e496] text-black" 
+                                : "bg-[#bcbcbc] text-black"
+                              }`}
+                            >
+                              {motorState.isOn ? "ON" : "OFF"}
+                            </button>
+                          ) : (
+                            <div className="w-full flex flex-col items-center">
+                              <div className="w-full flex items-center justify-between gap-1 mb-0">
+                                <div className="flex flex-col gap-0 w-full">
+                                  <label className="text-[9px] font-bold text-[#4f8820]">Start Time</label>
+                                  <input
+                                    type="time"
+                                    value={motorState.onTime}
+                                    onChange={(e) => updateMotorTime(motor.name, "onTime", e.target.value)}
+                                    className="w-full rounded-md border border-gray-300 px-0.5 py-0.5 text-[9px] text-center bg-white shadow-sm outline-none"
+                                  />
+                                </div>
+                                
+                                {/* Vertical Divider */}
+                                <div className="w-[1.5px] h-8 bg-black mt-3 self-center" />
+
+                                <div className="flex flex-col gap-0 w-full">
+                                  <label className="text-[9px] font-bold text-[#4f8820]">End Time</label>
+                                  <input
+                                    type="time"
+                                    value={motorState.offTime}
+                                    onChange={(e) => updateMotorTime(motor.name, "offTime", e.target.value)}
+                                    className="w-full rounded-md border border-gray-300 px-0.5 py-0.5 text-[9px] text-center bg-white shadow-sm outline-none"
+                                  />
+                                </div>
+                              </div>
                               <button
-                                onClick={() => toggleMotor(motor.name, motorIdx)}
-                                className={`w-12 h-6 rounded-full transition-colors relative ${
-                                  motorData.isOn ? "bg-blue-500" : "bg-gray-300"
-                                }`}
+                                onClick={() => saveAuto(motor.name, idx)}
+                                className="w-[60px] mt-1 rounded-full py-1 bg-[#557b44] hover:bg-[#466638] text-white text-[9px] font-bold shadow-md transition-colors mx-auto"
                               >
-                                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
-                                  motorData.isOn ? "left-7" : "left-1"
-                                }`} />
+                                SAVE
                               </button>
                             </div>
-
-                            {currentBlockMode === "auto" && (
-                              <div className="space-y-3 pt-2 border-t border-gray-200/50">
-                                <div className="flex items-center justify-between text-xs font-medium text-gray-500">
-                                  <div className="flex flex-col gap-1">
-                                    <span>START TIME</span>
-                                    <input 
-                                      type="time" 
-                                      value={motorData.onTime}
-                                      onChange={(e) => updateMotorTime(motor.name, "onTime", e.target.value)}
-                                      className="bg-white border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                    />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <span>END TIME</span>
-                                    <input 
-                                      type="time" 
-                                      value={motorData.offTime}
-                                      onChange={(e) => updateMotorTime(motor.name, "offTime", e.target.value)}
-                                      className="bg-white border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                    />
-                                  </div>
-                                </div>
-                                <button 
-                                  onClick={() => saveAuto(motor.name, motorIdx)}
-                                  className="w-full py-1.5 bg-blue-500 text-white rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
-                                >
-                                  SAVE SCHEDULE
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
-                </div>
-              );
-            })}
 
-            {/* Controls for adding/removing motor blocks */}
-            <div className="flex justify-center gap-4 mt-8">
-              <button
-                onClick={addMotorBlock}
-                className="flex items-center gap-2 px-6 py-2.5 bg-[#5bc0eb] text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-[#4ab0db] transition-all transform hover:scale-105 active:scale-95"
-              >
-                <PlusIcon className="w-5 h-5" />
-                ADD MOTOR BLOCK
-              </button>
-              {motorList.length > 2 && (
-                <button
-                  onClick={removeMotorBlock}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-white text-gray-600 border-2 border-gray-100 rounded-xl font-bold hover:bg-gray-50 transition-all transform hover:scale-105 active:scale-95"
-                >
-                  REMOVE BLOCK
-                </button>
-              )}
-            </div>
-          </div>
+                {/* Controls - Aligned Side-by-Side */}
+                {blockIdx === Math.ceil(motorList.length / 2) - 1 && (
+                  <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                    <button
+                      onClick={addMotorBlock}
+                      className="bg-black text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
+                      title="Add Motor Block"
+                    >
+                      <PlusIcon className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={removeMotorBlock}
+                      className="bg-white text-red-600 p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center border border-red-100"
+                      title="Remove last block"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
         </div>
       </main>
+      <div>
+        <img
+          src="/images/design_img.png"
+          alt="Footer Image"
+          className="w-25 h-23 object-cover object-top mt-auto"
+        />
+      </div>
     </div>
-  );
-}
-
-export default function DashboardPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#eefae6]">Loading Dashboard...</div>}>
-      <DashboardContent />
-    </Suspense>
   );
 }
