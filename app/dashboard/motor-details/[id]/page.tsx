@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { PencilIcon, PlusIcon, ArrowLeftIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { subscribeToTopic, publishMessage } from "../../../../lib/mqttClient";
+import { Suspense } from "react";
 
 type PhaseValues = { v: number; i: number; p: number; e: number };
 type MotorState = { isOn: boolean; onTime: string; offTime: string };
@@ -27,6 +28,14 @@ const MOTOR_TOPICS: Record<number, { control: string; status: string }> = {
 // Motor icon - sample (replace src with your own icon later)
 const MOTOR_ICON_SRC =
   "https://res.cloudinary.com/dbyxgnjkw/image/upload/v1767021968/icons8-motor-50_ooixaf.png";
+
+export default function MotorDetailPage() {
+  return (
+    <Suspense>
+      <MotorDetailContent />
+    </Suspense>
+  );
+}
 
 function MotorDetailContent() {
   const router = useRouter();
@@ -796,13 +805,5 @@ function MotorDetailContent() {
         />
       </div>
     </div >
-  );
-}
-
-export default function MotorDetailPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#eefae6]">Loading Motor Details...</div>}>
-      <MotorDetailContent />
-    </Suspense>
   );
 }
