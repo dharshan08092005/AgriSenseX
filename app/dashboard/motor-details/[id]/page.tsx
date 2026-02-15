@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { PencilIcon, PlusIcon, ArrowLeftIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import {
+  PencilIcon,
+  PlusIcon,
+  ArrowLeftIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 import { subscribeToTopic, publishMessage } from "../../../../lib/mqttClient";
 import { Suspense } from "react";
 
@@ -40,7 +46,7 @@ export default function MotorDetailPage() {
 function MotorDetailContent() {
   const router = useRouter();
   const params = useParams();
-  const motorId = typeof params?.id === 'string' ? params.id : '';
+  const motorId = typeof params?.id === "string" ? params.id : "";
   const [voltage, setVoltage] = useState(100);
   const [current, setCurrent] = useState(11.0);
   const [isModeConnected, setIsModeConnected] = useState(false);
@@ -276,11 +282,18 @@ function MotorDetailContent() {
 
   const toggleMotor = (name: string, index: number) => {
     setMotors((p) => {
-      const currentMotor = p[name] || { isOn: false, onTime: "06:00", offTime: "18:00" };
-      const updated = { ...p, [name]: { ...currentMotor, isOn: !currentMotor.isOn } };
+      const currentMotor = p[name] || {
+        isOn: false,
+        onTime: "06:00",
+        offTime: "18:00",
+      };
+      const updated = {
+        ...p,
+        [name]: { ...currentMotor, isOn: !currentMotor.isOn },
+      };
       if (typeof window !== "undefined")
         localStorage.setItem("motors", JSON.stringify(updated));
-      
+
       const topic = MOTOR_TOPICS[index]?.control;
       if (topic) {
         const isOn = updated[name].isOn;
@@ -320,7 +333,11 @@ function MotorDetailContent() {
     v: string,
   ) => {
     setMotors((p) => {
-      const currentMotor = p[name] || { isOn: false, onTime: "06:00", offTime: "18:00" };
+      const currentMotor = p[name] || {
+        isOn: false,
+        onTime: "06:00",
+        offTime: "18:00",
+      };
       const updated = { ...p, [name]: { ...currentMotor, [field]: v } };
       if (typeof window !== "undefined")
         localStorage.setItem("motors", JSON.stringify(updated));
@@ -357,7 +374,9 @@ function MotorDetailContent() {
   const updateMotorName = (id: string, oldName: string, newName: string) => {
     if (!newName.trim()) return;
     setMotorList((prev) => {
-      const updated = prev.map((m) => (m.id === id ? { ...m, name: newName } : m));
+      const updated = prev.map((m) =>
+        m.id === id ? { ...m, name: newName } : m,
+      );
       if (typeof window !== "undefined")
         localStorage.setItem("motorList", JSON.stringify(updated));
       return updated;
@@ -468,15 +487,24 @@ function MotorDetailContent() {
     >
       {/* Top weather banner - desktop: centered content */}
       <header className="sticky top-0 z-50 bg-white shadow-sm px-4 py-3 flex items-center gap-4">
-        <button 
-          onClick={() => router.push('/dashboard')}
+        <button
+          onClick={() => router.push("/dashboard")}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
         </button>
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#90cd72] rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">A</span>
+
+        <Link
+          href={`/dashboard?mode=${mode}`}
+          className="flex items-center gap-2"
+        >
+          {/* Icon Container */}
+          <div className="w-8 h-8 bg-[#90cd72] rounded-lg flex items-center justify-center overflow-hidden">
+            <img
+              src="/images/farmer.png"
+              alt="Farmer"
+              className="w-7 h-7 object-contain"
+            />
           </div>
           <span className="font-bold text-xl text-gray-800">AgriSenseX</span>
         </Link>
@@ -549,8 +577,8 @@ function MotorDetailContent() {
       <main className="flex-1 px-4 sm:px-6 lg:px-10 xl:px-12 pt-6 pb-8 sm:pt-8 sm:pb-12 lg:pt-10 lg:pb-16 ">
         <div className="max-w-5xl lg:max-w-6xl mx-auto ">
           {/* Phase Monitoring - desktop: card layout like reference */}
-          <section className="mb-8 rounded-2xl p-5 sm:p-6 lg:p-8 bg-[#dcffcb]/60 border border-[#b8d4a0] shadow-[4px_4px_10px_0px_rgba(0,0,0,0.8)]">
-            <h1 className="text-center text-xl sm:text-lg font-extrabold text-shadow-lg uppercase tracking-wider text-[#2d3436] mb-1">
+          <section className="mb-8 rounded-2xl p-5 sm:p-6 lg:p-8 bg-white border border-[#000000] shadow-[1px_5px_6px_-1px_rgba(0,_0,_0,_0.8)]">
+            <h1 className="text-center text-xl sm:text-lg font-bold text-shadow-lg uppercase tracking-wider text-[#2d3436] mb-1">
               Phase Monitoring
             </h1>
             <p className="text-center text-xs sm:text-sm text-[#2d3436]/80 mb-4 sm:mb-6">
@@ -560,7 +588,7 @@ function MotorDetailContent() {
               {phaseCircles.map((p) => (
                 <div
                   key={p.id}
-                  className={`flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[#eefae6] border-3 ${p.borderClass} shadow-sm`}
+                  className={`flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full bg-[#d5f6c4f2] border-3 ${p.borderClass} shadow-sm`}
                 >
                   <span className="text-base sm:text-lg font-mono font-bold text-[#2d3436]">
                     {p.v}V
@@ -572,7 +600,7 @@ function MotorDetailContent() {
                 </div>
               ))}
             </div>
-            <div className="rounded-3xl p-4 border border-[#dcffcb] shadow-[0px_0px_9px_-3px_rgba(0,0,0,0.2)] flex items-center justify-between gap-4">
+            <div className="rounded-2xl p-4 border border-[#D9D9D9] shadow-[0px_0px_9px_-3px_rgba(0,0,0,0.2)] flex items-center justify-between gap-4">
               <div>
                 <label className="text-sm font-semibold text-[#4f8820] block mb-1">
                   Voltage & Current Threshold:
@@ -585,7 +613,7 @@ function MotorDetailContent() {
                 onClick={() =>
                   router.push("/dashboard/motor-control/thresholds")
                 }
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#90cd72] hover:bg-[#a8c890] text-[#2d3436] transition-colors shadow-sm"
+                className="flex items-center justify-center w-12 h-10 rounded-lg bg-[#B3F296] hover:bg-[#a8c890] text-[#2d3436] transition-colors shadow-sm"
                 aria-label="Edit thresholds"
               >
                 <PencilIcon className="w-5 h-5" />
@@ -601,11 +629,12 @@ function MotorDetailContent() {
 
             {(() => {
               // Find the motor
-              const currentMotor = motorList.find(m => m.id === motorId) || motorList[0];
+              const currentMotor =
+                motorList.find((m) => m.id === motorId) || motorList[0];
               if (!currentMotor) return <div>Motor not found</div>;
 
               const motor = currentMotor;
-              const idx = motorList.findIndex(m => m.id === motor.id);
+              const idx = motorList.findIndex((m) => m.id === motor.id);
               const motorState = motors[motor.name] ?? {
                 isOn: false,
                 onTime: "06:00",
@@ -616,15 +645,14 @@ function MotorDetailContent() {
               return (
                 <div
                   key={motor.id}
-                  className="rounded-2xl border border-[#b8d4a0] bg-[#e8f5e0]/50 shadow-[0px_8px_13px_-5px_rgba(0,0,0,0.35)] overflow-hidden p-4"
+                  className="rounded-2xl border border-[#b8d4a0] bg-white shadow-[0px_8px_13px_-5px_rgba(0,0,0,0.35)] overflow-hidden p-4"
                 >
                   {/* Header: Name + Edit + Toggle */}
                   <div className="flex items-center justify-between mb-0.5">
-
                     <div className="flex items-center gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl text-white overflow-hidden">
                         <img
-                          src="/images/electric-motor.png"
+                          src="/images/motor.png"
                           alt=""
                           className="w-full h-full object-contain"
                         />
@@ -640,7 +668,13 @@ function MotorDetailContent() {
                               autoFocus
                             />
                             <button
-                              onClick={() => updateMotorName(motor.id, motor.name, editingName)}
+                              onClick={() =>
+                                updateMotorName(
+                                  motor.id,
+                                  motor.name,
+                                  editingName,
+                                )
+                              }
                               className="p-1 bg-[#90cd72] text-white rounded hover:bg-[#7faf3b]"
                             >
                               <CheckIcon className="w-3 h-3" />
@@ -657,8 +691,8 @@ function MotorDetailContent() {
                             <span className="text-xl font-bold text-[#2d3436]">
                               {motor.name}
                             </span>
-                            <PencilIcon 
-                              className="w-4 h-4 text-gray-500 cursor-pointer hover:text-[#90cd72]" 
+                            <PencilIcon
+                              className="w-4 h-4 text-gray-500 cursor-pointer hover:text-[#90cd72]"
                               onClick={() => {
                                 setEditingName(motor.name);
                                 setEditingMotorId(motor.id);
@@ -669,7 +703,7 @@ function MotorDetailContent() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex flex-col items-end gap-0.5 justify-center align-center">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -681,28 +715,30 @@ function MotorDetailContent() {
                           className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${motorState.isOn ? "left-7" : "left-1"}`}
                         />
                       </button>
-                      <span className="text-[10px] text-gray-500 font-bold uppercase">{motorState.isOn ? "ON" : "OFF"}</span>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase text-center">
+                        ON/OFF
+                      </span>
                     </div>
                   </div>
 
                   {/* Manual / Auto Tabs */}
-                  <div className="flex rounded-full bg-[#dcecd4] p-1 mb-1.5 max-w-md mx-auto">
+                  <div className="flex rounded-full bg-[#ebf2e7] p-1 mb-1.5 max-w-md mx-auto">
                     <button
                       onClick={() => setMotorMode(motor.id, "manual")}
-                      className={`flex-1 rounded-full py-2 text-sm font-bold transition-all ${mode === "manual" ? "bg-[#90cd72] text-black shadow-md border border-[#7faf3b]" : "text-[#5c6b54] hover:bg-[#c9e0bd]"}`}
+                      className={`flex-1 rounded-full py-2 text-sm font-bold transition-all ${mode === "manual" ? "bg-[#B3F296] text-black border border-none shadow-[0px_5px_6px_-1px_rgba(0,_0,_0,_0.8)]" : "text-[#5c6b54] hover:bg-[#c9e0bd]"}`}
                     >
                       MANUAL
                     </button>
                     <button
                       onClick={() => setMotorMode(motor.id, "auto")}
-                      className={`flex-1 rounded-full py-2 text-sm font-bold transition-all ${mode === "auto" ? "bg-[#90cd72] text-black shadow-md border border-[#7faf3b]" : "text-[#5c6b54] hover:bg-[#c9e0bd]"}`}
+                      className={`flex-1 rounded-full py-2 text-sm font-bold transition-all ${mode === "auto" ? "bg-[#B3F296] text-black border border-none shadow-[0px_5px_6px_-1px_rgba(0,_0,_0,_0.8)]" : "text-[#5c6b54] hover:bg-[#c9e0bd]"}`}
                     >
                       AUTO
                     </button>
                   </div>
 
                   {/* Content (Valves) */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 mt-2">
                     {["Valve 1", "Valve 2"].map((v) => {
                       // Valve State Check
                       const isValveOn = valves[v]?.isOn;
@@ -716,7 +752,7 @@ function MotorDetailContent() {
                             <>
                               <div className="flex h-14 w-14 items-center justify-center rounded-xl text-white">
                                 <img
-                                  src="/images/valve_icon.png"
+                                  src="/images/valve.png"
                                   alt="Valve"
                                   className="w-12 h-12"
                                 />
@@ -729,7 +765,7 @@ function MotorDetailContent() {
                                   e.stopPropagation();
                                   handleToggleValve(v);
                                 }}
-                                className={`w-20 rounded-2xl py-2 text-xs font-bold transition-colors ${isValveOn ? "bg-[#90cd72] text-black" : "bg-gray-300 text-gray-700"}`}
+                                className={`w-20 rounded-2xl mt-2 py-2 text-xs font-bold transition-colors ${isValveOn ? "bg-[#90cd72] text-black" : "bg-gray-300 text-gray-700"}`}
                               >
                                 {isValveOn ? "ON" : "OFF"}
                               </button>
@@ -740,36 +776,52 @@ function MotorDetailContent() {
                               <div className="flex flex-col items-center gap-0 mb-0">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-xl text-white">
                                   <img
-                                    src="/images/valve_icon.png"
+                                    src="/images/valve.png"
                                     alt="Valve"
                                     className="w-6 h-6"
                                   />
                                 </div>
-                                <span className="text-[10px] font-bold text-[#2d3436]">
+                                <span className="text-[13px] font-bold text-[#2d3436]">
                                   {v}
                                 </span>
                               </div>
 
                               <div className="w-full flex items-center justify-between gap-1">
-                                <div className="flex flex-col gap-0 w-full">
-                                  <label className="text-[9px] font-bold text-[#4f8820]">Start Time</label>
+                                <div className="flex flex-col gap-0 w-full align-center justify-center">
+                                  <label className="text-[10px] font-bold text-black text-center">
+                                    Start Time
+                                  </label>
                                   <input
                                     type="time"
                                     value={motorState.onTime}
-                                    onChange={(e) => updateMotorTime(motor.name, "onTime", e.target.value)}
+                                    onChange={(e) =>
+                                      updateMotorTime(
+                                        motor.name,
+                                        "onTime",
+                                        e.target.value,
+                                      )
+                                    }
                                     className="w-full rounded-md border border-gray-300 px-0.5 py-0.5 text-[9px] text-center bg-white shadow-sm"
                                   />
                                 </div>
 
                                 {/* Vertical Divider */}
-                                <div className="w-px h-8 bg-black mt-3 self-center" />
+                                <div className="w-[1.5px] h-8 bg-black mt-3 shrink-0" />
 
                                 <div className="flex flex-col gap-0 w-full">
-                                  <label className="text-[9px] font-bold text-[#4f8820]">End Time</label>
+                                  <label className="text-[10px] font-bold text-black text-center">
+                                    End Time
+                                  </label>
                                   <input
                                     type="time"
                                     value={motorState.offTime}
-                                    onChange={(e) => updateMotorTime(motor.name, "offTime", e.target.value)}
+                                    onChange={(e) =>
+                                      updateMotorTime(
+                                        motor.name,
+                                        "offTime",
+                                        e.target.value,
+                                      )
+                                    }
                                     className="w-full rounded-md border border-gray-300 px-0.5 py-0.5 text-[9px] text-center bg-white shadow-sm"
                                   />
                                 </div>
@@ -780,7 +832,7 @@ function MotorDetailContent() {
                                   e.stopPropagation();
                                   saveAuto(motor.name, idx);
                                 }}
-                                className="mt-1 w-[60px] rounded-full py-1 bg-[#557b44] hover:bg-[#466638] text-white text-[9px] font-bold shadow-md transition-colors mx-auto"
+                                className="mt-1 w-[60px] rounded-full py-1 bg-[#4D6033] hover:bg-[#466638] text-white text-[9px] font-bold shadow-md transition-colors mx-auto"
                               >
                                 SAVE
                               </button>
@@ -794,9 +846,8 @@ function MotorDetailContent() {
               );
             })()}
           </section>
-
         </div>
-      </main >
+      </main>
       <div>
         <img
           src="/images/design_img.png"
@@ -804,6 +855,6 @@ function MotorDetailContent() {
           className="w-25 h-23 object-cover object-top mt-auto"
         />
       </div>
-    </div >
+    </div>
   );
 }

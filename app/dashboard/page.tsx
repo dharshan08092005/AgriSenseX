@@ -621,12 +621,12 @@ function DashboardContent() {
                 <div key={blockIdx} className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 relative space-y-6">
                   {/* Local Manual / Auto Toggle */}
                   <div className="flex justify-center">
-                    <div className="bg-[#f7fdf4] p-1 rounded-full flex w-full max-w-[280px] shadow-sm border border-[#e8f5e1]">
+                    <div className="bg-[#f7fdf4] rounded-full flex w-full max-w-[280px] shadow-sm border-none">
                       <button
                         onClick={() => setBlockMode("manual")}
                         className={`flex-1 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
                           currentBlockMode === "manual" 
-                          ? "bg-[#b6e496] text-black shadow-md" 
+                          ? "bg-[#b6e496] text-black border-none shadow-[0px_5px_6px_-1px_rgba(0,_0,_0,_0.8)]" 
                           : "text-gray-400"
                         }`}
                       >
@@ -636,7 +636,7 @@ function DashboardContent() {
                         onClick={() => setBlockMode("auto")}
                         className={`flex-1 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
                           currentBlockMode === "auto" 
-                          ? "bg-[#b6e496] text-black shadow-md" 
+                          ? "bg-[#b6e496] text-black border-none shadow-[0px_5px_6px_-1px_rgba(0,_0,_0,_0.8)]" 
                           : "text-gray-400"
                         }`}
                       >
@@ -657,11 +657,11 @@ function DashboardContent() {
                       return (
                         <div
                           key={motor.id}
-                          className="bg-[#eaf8e1] rounded-[32px] p-2 sm:p-3 flex flex-col items-center shadow-sm hover:shadow-md transition-shadow duration-300"
+                          className="bg-[#eaf8e1] rounded-2xl p-2 sm:p-3 flex flex-col items-center shadow-sm hover:shadow-md transition-shadow duration-300"
                         >
                           <div 
                             className="flex flex-col items-center cursor-pointer w-full"
-                            onClick={() => router.push(`/dashboard/motor-details/${motor.id}`)}
+                            onClick={() => router.push(`/dashboard/motor-details/${motor.id}?mode=${mode}`)}
                           >
                             <h3 className="text-lg sm:text-xl font-bold text-black mb-0">
                               {motor.name}
@@ -681,7 +681,7 @@ function DashboardContent() {
                               onClick={() => {
                                 toggleMotor(motor.name, idx);
                               }}
-                              className={`w-full max-w-[100px] py-1 rounded-full font-bold text-xs shadow-sm transition-all active:scale-95 ${
+                              className={`w-15 py-1 rounded-full font-bold text-xs shadow-sm transition-all active:scale-95 ${
                                 motorState.isOn 
                                 ? "bg-[#b6e496] text-black" 
                                 : "bg-[#bcbcbc] text-black"
@@ -730,7 +730,7 @@ function DashboardContent() {
 
                 {/* Controls - Aligned Side-by-Side */}
                 {blockIdx === Math.ceil(motorList.length / 2) - 1 && (
-                  <div className="absolute bottom-0 right-4 flex items-center gap-3 z-20">
+                  <div className="absolute bottom-0 right-4 flex items-center gap-3 z-20 mb-1">
                     <button
                       onClick={addMotorBlock}
                       className="bg-black text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
