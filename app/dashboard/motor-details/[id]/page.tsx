@@ -486,7 +486,7 @@ function MotorDetailContent() {
       style={{ backgroundColor: "#eefae6" }}
     >
       {/* Top weather banner - desktop: centered content */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm px-4 py-3 flex items-center gap-4">
+      <header className="sticky top-0 z-50 bg-[#f0fbe9] shadow-sm px-4 py-3 flex items-center gap-4">
         <button
           onClick={() => router.push("/dashboard")}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
